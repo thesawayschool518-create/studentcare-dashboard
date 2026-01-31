@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Student Care Admin Dashboard - Manage students, teachers, courses and attendance">
+    <title>Student Care Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+        }
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 220px;
+            background: #263043;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar-header {
+            padding: 24px 0;
+            text-align: center;
+            background: #1b2232;
+            font-size: 1.3em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #354557;
+        }
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-nav li {
+            padding: 16px 20px;
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .sidebar-nav li:hover {
+            background: #1b2232;
+            border-left: 4px solid #4fc3f7;
+        }
+        .sidebar-nav li.active {
+            background: #1b2232;
+            border-left: 4px solid #4fc3f7;
+        }
+        .sidebar-nav a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            font-size: 0.95em;
+        }
+        .main-content {
+            flex: 1;
+            margin-left: 220px;
+            padding: 32px;
+        }
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .main-header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            color: #263043;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .user-info {
+            font-weight: 500;
+            color: #263043;
+        }
+        .logout-btn {
+            background: #4fc3f7;
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+        .logout-btn:hover {
+            background: #0288d1;
+        }
+        .dashboard-widgets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .widget {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 24px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .widget:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .widget h3 {
+            margin: 0 0 12px 0;
+            color: #4fc3f7;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .widget p {
+            font-size: 2.5em;
+            margin: 0;
+            color: #263043;
+            font-weight: bold;
+        }
+        .dashboard-table {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 24px;
+        }
+        .dashboard-table h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #263043;
+            font-size: 1.3em;
+        }
+        .dashboard-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .dashboard-table th {
+            background: #f4f6f8;
+            color: #263043;
+            font-weight: 600;
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .dashboard-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .dashboard-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .status-present {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+        .status-absent {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        .status-late {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+            .main-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            .dashboard-widgets {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-table {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>StudentCare</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active"><a href="#">Dashboard</a></li>
+                    <li><a href="#">Students</a></li>
+                    <li><a href="#">Teachers</a></li>
+                    <li><a href="#">Courses</a></li>
+                    <li><a href="#">Attendance</a></li>
+                    <li><a href="#">Reports</a></li>
+                    <li><a href="#">Settings</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Admin Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <span class="user-info">Admin User</span>
+                    <button class="logout-btn">Logout</button>
+                </div>
+            </header>
+            <section class="dashboard-widgets">
+                <div class="widget">
+                    <h3>Total Students</h3>
+                    <p id="total-students">1200</p>
+                </div>
+                <div class="widget">
+                    <h3>Total Teachers</h3>
+                    <p id="total-teachers">85</p>
+                </div>
+                <div class="widget">
+                    <h3>Active Courses</h3>
+                    <p id="total-courses">32</p>
+                </div>
+                <div class="widget">
+                    <h3>Attendance Today</h3>
+                    <p id="attendance-today">92%</p>
+                </div>
+            </section>
+            <section class="dashboard-table">
+                <h2>Recent Student Activity</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Class</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activity-table-body">
+                        <tr>
+                            <td>Ali Raza</td>
+                            <td>10-A</td>
+                            <td><span class="status-badge status-present">Present</span></td>
+                            <td>2026-01-30</td>
+                        </tr>
+                        <tr>
+                            <td>Sara Khan</td>
+                            <td>9-B</td>
+                            <td><span class="status-badge status-absent">Absent</span></td>
+                            <td>2026-01-30</td>
+                        </tr>
+                        <tr>
+                            <td>Ahmed Ali</td>
+                            <td>8-C</td>
+                            <td><span class="status-badge status-present">Present</span></td>
+                            <td>2026-01-30</td>
+                        </tr>
+                        <tr>
+                            <td>Fatima Noor</td>
+                            <td>7-A</td>
+                            <td><span class="status-badge status-present">Present</span></td>
+                            <td>2026-01-30</td>
+                        </tr>
+                        <tr>
+                            <td>Bilal Aslam</td>
+                            <td>10-B</td>
+                            <td><span class="status-badge status-late">Late</span></td>
+                            <td>2026-01-30</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Sidebar navigation active state
+        document.querySelectorAll('.sidebar-nav li').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Logout button functionality
+        document.querySelector('.logout-btn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to logout?')) {
+                alert('Logged out successfully!');
+            }
+        });
+
+        // Auto-update attendance percentage
+        setInterval(function() {
+            const attendance = Math.floor(Math.random() * 30) + 70; // Random 70-100%
+            document.getElementById('attendance-today').textContent = attendance + '%';
+        }, 5000);
+    </script>
+</body>
+</html>
